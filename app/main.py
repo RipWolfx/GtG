@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, students, schedule
 from app.database import engine, Base
+from app.init_db import init_db
 
 Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="SENATI Backend API",
@@ -18,6 +20,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+def _seed_on_startup():
+    init_db()
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(students.router, prefix="/api/students", tags=["Students"])
